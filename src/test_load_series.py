@@ -13,22 +13,32 @@ if DATA_DIR is None:
     raise EnvironmentError("DATA_DIR environment variable is not set.")
 
 def load_predicted_data():
-    """
-    Load the three data sources and combine them column-wise.
-    It is assumed that the dataframes share a common index (e.g. date or CUSIP).
-    """
-    # Load treasury inflation swaps from CSV
-    swaps_path = os.path.join(DATA_DIR, "treasury_inflation_swaps.csv")
+    # Load treasury inflation swaps from CSV.
+    swaps_path = os.path.join(os.environ.get("DATA_DIR"), "treasury_inflation_swaps.csv")
     df_swaps = pd.read_csv(swaps_path)
     
-    # Load fed yield curve data
+    # Rename and select the required columns.
+    swaps_rename_mapping = {
+        "USSWIT1 BGN Curncy": "Treasury_Swap_01Y",
+        "USSWIT10 BGN Curncy": "Treasury_Swap_10Y",
+        "USSWIT2 BGN Curncy": "Treasury_Swap_02Y",
+        "USSWIT20 BGN Curncy": "Treasury_Swap_20Y",
+        "USSWIT3 BGN Curncy": "Treasury_Swap_03Y",
+        "USSWIT30 BGN Curncy": "Treasury_Swap_30Y",
+        "USSWIT5 BGN Curncy": "Treasury_Swap_05Y"
+    }
+    df_swaps = df_swaps.rename(columns=swaps_rename_mapping)
+    
+    # Ensure that only the desired columns are kept.
+    df_swaps = df_swaps[list(swaps_rename_mapping.values())]
+    
+    # Load fed yield curve data.
     df_yield = load_fed_yield_curve_all()
     
-    # Load fed TIPS yield data
+    # Load fed TIPS yield data.
     df_tips = load_tips_yield_curve()
     
-    # Combine dataframes side by side.
-    # (Adjust the join if the dataframes do not share the same index.)
+    # Combine the dataframes side by side.
     df_predicted = pd.concat([df_swaps, df_yield, df_tips], axis=1)
     return df_predicted
 

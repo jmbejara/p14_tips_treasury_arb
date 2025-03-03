@@ -34,6 +34,23 @@ def pull_fed_yield_curve():
 def load_fed_yield_curve_all(data_dir=DATA_DIR):
     path = data_dir / "fed_yield_curve_all.parquet"
     _df = pd.read_parquet(path)
+    
+    # Select the specific columns. Note: SVENY03 is included so that
+    # we can rename to "Treasury_SF_03Y" as requested.
+    selected_cols = ['SVENY02', 'SVENY03', 'SVENY05', 'SVENY10', 'SVENY20', 'SVENY30']
+    _df = _df[selected_cols]
+    
+    # Rename the columns to the desired names.
+    rename_mapping = {
+        'SVENY10': 'Treasury_SF_10Y',
+        'SVENY02': 'Treasury_SF_02Y',
+        'SVENY20': 'Treasury_SF_20Y',
+        'SVENY03': 'Treasury_SF_03Y',
+        'SVENY30': 'Treasury_SF_30Y',
+        'SVENY05': 'Treasury_SF_05Y'
+    }
+    _df = _df.rename(columns=rename_mapping)
+    
     return _df
 
 def load_fed_yield_curve(data_dir=DATA_DIR):
