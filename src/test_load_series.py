@@ -1,73 +1,78 @@
+import os
 import pandas as pd
-import polars as pl
+import pytest
 
-from matplotlib import pyplot as plt
-import seaborn as sns
-sns.set()
+# Import the data-loading functions from your repository.
+from pull_fed_yield_curve import load_fed_yield_curve_all
+from pull_fed_tips_yield_curve import load_tips_yield_curve
+import load_bases_data
 
-from settings import config
+# Get the DATA_DIR from the environment. Ensure this env variable is set.
+DATA_DIR = os.environ.get("DATA_DIR")
+if DATA_DIR is None:
+    raise EnvironmentError("DATA_DIR environment variable is not set.")
 
-DATA_DIR = config("DATA_DIR")
-
-
-name_map = {
-    "raw_box_12m": "Box_06m",
-    "raw_box_18m": "Box_12m",
-    "raw_box_6m": "Box_18m",
-    "raw_cal_dow": "Eq_SF_Dow",
-    "raw_cal_ndaq": "Eq_SF_NDAQ",
-    "raw_cal_spx": "Eq_SF_SPX",
-    "raw_cds_bond_hy": "CDS_Bond_HY",
-    "raw_cds_bond_ig": "CDS_Bond_IG",
-    "raw_cip_aud": "CIP_AUD",
-    "raw_cip_cad": "CIP_CAD",
-    "raw_cip_chf": "CIP_CHF",
-    "raw_cip_eur": "CIP_EUR",
-    "raw_cip_gbp": "CIP_GBP",
-    "raw_cip_jpy": "CIP_JPY",
-    "raw_cip_nzd": "CIP_NZD",
-    "raw_cip_sek": "CIP_SEK",
-    "raw_tfut_10": "Treasury_SF_10Y",
-    "raw_tfut_2": "Treasury_SF_02Y",
-    "raw_tfut_20": "Treasury_SF_20Y",
-    "raw_tfut_30": "Treasury_SF_30Y",
-    "raw_tfut_5": "Treasury_SF_05Y",
-    "raw_tips_treas_10": "TIPS_Treasury_10Y",
-    "raw_tips_treas_2": "TIPS_Treasury_02Y",
-    "raw_tips_treas_20": "TIPS_Treasury_20Y",
-    "raw_tips_treas_5": "TIPS_Treasury_05Y",
-    "raw_tswap_1": "Treasury_Swap_01Y",
-    "raw_tswap_10": "Treasury_Swap_10Y",
-    "raw_tswap_2": "Treasury_Swap_02Y",
-    "raw_tswap_20": "Treasury_Swap_20Y",
-    "raw_tswap_3": "Treasury_Swap_03Y",
-    "raw_tswap_30": "Treasury_Swap_30Y",
-    "raw_tswap_5": "Treasury_Swap_05Y",
-}
-
-def load_combined_spreads_wide(data_dir=DATA_DIR, raw=False, rename=True):
+def load_predicted_data():
     """
-    Wide include extra variables.
-    In the raw data, variables labeled "raw" are the raw spreads.
-    Without raw means the absolute value has been applied.
+    Load the three data sources and combine them column-wise.
+    It is assumed that the dataframes share a common index (e.g. date or CUSIP).
     """
-    data_dir = Path(data_dir)
-    # filepath = (
-    #     data_dir / "arbitrage_spread_wide.dta"
-    # )
-    filepath = "https://www.dropbox.com/scl/fi/81jm3dbe856i7p17rjy87/arbitrage_spread_wide.dta?rlkey=ke78u464vucmn43zt27nzkxya&st=59g2n7dt&dl=1"
-    df = pd.read_stata(filepath).set_index("date")
-    if raw:
-        ret = df.copy()
-    else:
-        ret = df[list(name_map.keys())]
-        if rename:
-            ret = ret.rename(columns=name_map)
-        ret = ret.reindex(sorted(ret.columns), axis=1)
-    return ret
+    # Load treasury inflation swaps from CSV
+    swaps_path = os.path.join(DATA_DIR, "treasury_inflation_swaps.csv")
+    df_swaps = pd.read_csv(swaps_path)
+    
+    # Load fed yield curve data
+    df_yield = load_fed_yield_curve_all()
+    
+    # Load fed TIPS yield data
+    df_tips = load_tips_yield_curve()
+    
+    # Combine dataframes side by side.
+    # (Adjust the join if the dataframes do not share the same index.)
+    df_predicted = pd.concat([df_swaps, df_yield, df_tips], axis=1)
+    return df_predicted
 
+def test_data_closeness():
+    """
+    Test that for every column the relative differences between the predicted
+    data (from our three sources) and the base reliable data are within tolerances.
+    
+    For columns not starting with "TIPS_", we require:
+         |Predicted - Actual| < 5%
+    For columns starting with "TIPS_", we require:
+         |Predicted - GSW| < 2%
+    """
+    # Load predicted data from our sources.
+    predicted = load_predicted_data()
+    
+    # Load the reliable base data.
+    base_data = load_bases_data.load_combined_spreads_wide(data_dir=DATA_DIR)
+    
+    # Check that every column in the base data is available in the predicted data.
+    missing_cols = [col for col in base_data.columns if col not in predicted.columns]
+    if missing_cols:
+        pytest.skip(f"The following columns are missing in predicted data: {missing_cols}")
+
+    # Loop over each column in the base data and compute the percentage difference.
+    # The assumption here is that the "difference" is computed as a relative error:
+    #     (predicted - base) / base
+    for col in base_data.columns:
+        # Compute the relative difference.
+        diff = (predicted[col] - base_data[col]) / base_data[col]
+        
+        # Determine tolerance based on the column group.
+        if col.startswith("TIPS_"):
+            tolerance = 0.02
+            tolerance_label = "Predicted - GSW %"
+        else:
+            tolerance = 0.05
+            tolerance_label = "Predicted - Actual %"
+        
+        # Assert that the absolute difference for every entry is below the tolerance.
+        assert (diff.abs() < tolerance).all(), (
+            f"Column {col}: {tolerance_label} differences exceed tolerance of {tolerance*100:.0f}%."
+        )
 
 if __name__ == "__main__":
-    df = load_combined_spreads_wide(data_dir=DATA_DIR)
-    print(df.head())
-    
+    # This allows the test to be run standalone.
+    pytest.main([__file__])

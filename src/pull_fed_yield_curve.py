@@ -12,6 +12,14 @@ def pull_fed_yield_curve():
     Download the latest yield curve from the Federal Reserve
     
     This is the published data using Gurkaynak, Sack, and Wright (2007) model
+    
+    load in as: 
+    "Treasury_SF_10Y",
+    "Treasury_SF_02Y",
+    "Treasury_SF_20Y",
+    "Treasury_SF_03Y",
+    "Treasury_SF_30Y",
+    "Treasury_SF_05Y",
     """
     
     url = "https://www.federalreserve.gov/data/yield-curve-tables/feds200628.csv"

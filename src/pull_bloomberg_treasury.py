@@ -6,6 +6,15 @@ def main():
     """
     Pull daily historical 'PX_LAST' data for the given TIS tickers from 1/1/2000
     to today's date. Save the results in a single CSV file
+
+    load in columns as : 
+    "Treasury_Swap_01Y",
+    "Treasury_Swap_10Y",
+     "Treasury_Swap_02Y",
+    "Treasury_Swap_20Y",
+    "Treasury_Swap_03Y",
+    "Treasury_Swap_30Y",
+    "Treasury_Swap_05Y",
     """
     tickers = [
         "USSWITA BGN Curncy",   # 1M

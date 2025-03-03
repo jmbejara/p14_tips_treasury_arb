@@ -35,7 +35,7 @@ def pull_fed_tips_yield_curve():
     #df['date'] = pd.to_datetime(df['date'], format="%Y%m%d", errors='coerce')
 
     # List of relevant columns (for 2y, 5y, 10y, 20y TIPS yields)
-    #maturity_cols = ['TIPSY02', 'TIPSY05', 'TIPSY10', 'TIPSY20']
+    #maturity_cols = ['TIPS_Treasury_02Y', 'TIPS_Treasury_05Y', 'TIPS_Treasury_10Y', 'TIPS_Treasury_20Y']
     
     # Select necessary columns
     #df_yields = df[['date'] + maturity_cols].copy()
