@@ -28,7 +28,7 @@ def pull_fed_tips_yield_curve():
         raise Exception(f"Failed to fetch TIPS data: HTTP {response.status_code}")
     
     # Read CSV while skipping the first 19 rows (metadata)
-    df = pd.read_csv(BytesIO(response.content), skiprows=19)
+    df = pd.read_csv(BytesIO(response.content), skiprows=18)
     
     # Convert 'Date' column to datetime format
     #df.rename(columns={'Date': 'date'}, inplace=True)
