@@ -1,30 +1,28 @@
-import os
 from xbbg import blp
 from decouple import config
 
 OUTPUT_DIR = config("OUTPUT_DIR")
-START_DATE = config("START_DATE")
-END_DATE = config("END_DATE")
+START_DATE = config("START_DATE", "2020-01-01")
+END_DATE = config("END_DATE", "2025-01-01")
 
-def pull_treasury_inflation_swaps():
+def pull_treasury_inflation_swaps(
+    start_date=START_DATE,
+    end_date=END_DATE,
+    output_path="treasury_inflation_swaps.csv"
+):
     """
-    Bloomberg Treasury Inflation Swap Data Retrieval
+    Connects to Bloomberg via xbbg, pulls historical daily prices for USD
+    Treasury Inflation Swaps, and saves them to a CSV with columns matching
+    the provided treasury_inflation_swaps.csv file.
 
-    This script retrieves historical US Treasury Inflation Swap (TIS) rates from Bloomberg
-    using the xbbg package. It fetches daily 'PX_LAST' prices for various maturities
-    ranging from 1-month to 30-year, starting from the start date and ending date specified.
-
-    The script:
-    1. Connects to Bloomberg via the xbbg package
-    2. Pulls historical data for 11 different TIS tickers/maturities
-    3. Processes the multi-index dataframe to simplify column structure
-    4. Saves the result as a CSV file in the specified output directory
-
+    :param start_date: Start date in 'YYYY-MM-DD' format (str).
+    :param end_date: End date in 'YYYY-MM-DD' format (str).
+    :param output_path: Path to save the resulting CSV file.
+    :return: A pandas DataFrame containing the replicated data.
     """
+
+    # Tickers to replicate. Adjust as needed for 1M, 3M, 6M, etc.
     tickers = [
-        "USSWITA BGN Curncy",   # 1M
-        "USSWITC BGN Curncy",   # 3M
-        "USSWITF BGN Curncy",   # 6M
         "USSWIT1 BGN Curncy",   # 1Y
         "USSWIT2 BGN Curncy",   # 2Y
         "USSWIT3 BGN Curncy",   # 3Y
@@ -37,20 +35,28 @@ def pull_treasury_inflation_swaps():
 
     fields = ["PX_LAST"]
 
+    # Pull data using xbbg's bdh function
     df = blp.bdh(
         tickers=tickers,
         flds=fields,
-        start_date=START_DATE,
-        end_date=END_DATE
+        start_date=start_date,
+        end_date=end_date
     )
-    # df has a Date index and a MultiIndex for columns: (ticker, field).
-    # Because fields=["PX_LAST"], we can drop that extra field level for simplicity:
-    df.columns = df.columns.droplevel(level=1)  # Remove the "PX_LAST" level
+    # 'df' is a multi-index DataFrame with (date) as the index and (ticker, field) as columns.
+    # Drop the second level of columns ("PX_LAST"), so columns are just the tickers
+    df.columns = df.columns.droplevel(level=1)
 
-    out_path = os.path.join(OUTPUT_DIR, "treasury_inflation_swaps.csv")
-    df.to_csv(out_path, index=True)
+    df = df.reset_index()
 
-    print(f"Treasury Inflation Swaps data saved to: {out_path}")
+    df = df.rename(columns={"index": "Dates", "date": "Dates"})
+
+    # Reorder columns so "Dates" is first, followed by each ticker
+    col_order = ["Dates"] + tickers
+    df = df[col_order]
+
+    df.to_csv(output_path, index=False)
+
+    return df
 
 
 if __name__ == "__main__":
