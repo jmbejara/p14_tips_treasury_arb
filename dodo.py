@@ -153,22 +153,22 @@ def task_pull_fed_tips_yield_curve():
     }
 
 def task_pull_bloomberg_treasury_inflation_swaps():
-    """ """
-    file_dep = [
-        "./src/pull_bloomberg_treasury_inflation_swaps.py",
-    ]
-    targets = [
-        DATA_DIR / "treasury_inflation_swaps.parquet",
-    ]
+    """Run pull_bloomberg_treasury_inflation_swaps only if treasury_inflation_swaps.csv is not present in OUTPUT_DIR."""
+    from pathlib import Path  # ensure Path is available
+    output_dir = Path(OUTPUT_DIR)
+    if not any(output_dir.iterdir()):
+        # Only yield the nested task if the CSV file is not present.
+        yield {
+            "name": "run",
+            "actions": ["ipython ./src/pull_bloomberg_treasury_inflation_swaps.py"],
+            "file_dep": ["./src/pull_bloomberg_treasury_inflation_swaps.py"],
+            "targets": [DATA_DIR / "treasury_inflation_swaps.parquet"],
+            "clean": [],
+        }
+    else:
+        print("treasury_inflation_swaps.csv exists in OUTPUT_DIR; skipping task_pull_bloomberg_treasury_inflation_swaps")
 
-    return {
-        "actions": [
-            "ipython ./src/pull_bloomberg_treasury_inflation_swaps.py",
-        ],
-        "targets": targets,
-        "file_dep": file_dep,
-        "clean": [],
-    }
+
 
 def task_compute_tips_treasury():
     """ """

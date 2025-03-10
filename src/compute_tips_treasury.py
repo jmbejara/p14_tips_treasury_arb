@@ -12,7 +12,7 @@ OUTPUT_DIR = config("OUTPUT_DIR")
 # ------------------------------------------------------------------------------
 def import_inflation_swap_data():
 	# Point to the CSV file instead of an Excel file
-	swaps_path = os.path.join(DATA_DIR, "treasury_inflation_swaps.csv")
+	swaps_path = os.path.join(OUTPUT_DIR, "treasury_inflation_swaps.csv")
 
 	# Read CSV; explicitly parse the "Dates" column as datetime
 	swaps = pd.read_csv(swaps_path, parse_dates=["Dates"])
@@ -105,21 +105,36 @@ def import_tips_yields():
 # ------------------------------------------------------------------------------
 def compute_tips_treasury():
 	"""
-	Create Constant-Maturity TIPS-Treasury Arbitrage Series
+	Create Constant-Maturity TIPS-Treasury Arbitrage Series and Compute Implied Risk-Free Rates
 
-	This script calculates implied risk-free rates and arbitrage opportunities
-	between TIPS (Treasury Inflation-Protected Securities) and regular Treasury bonds.
-	It combines three data sources:
-	1. Inflation swap data from Excel
-	2. Zero-coupon Treasury yields (nominal rates)
-	3. TIPS yields (real rates)
+	This function merges data from three sources:
+		1. TIPS yields (real rates) imported via import_tips_yields()
+		2. Zero-coupon Treasury yields (nominal rates) imported via import_treasury_yields()
+		3. Inflation swap data (inflation expectations) imported via import_inflation_swap_data()
 
-	The script merges these datasets and computes:
-	- Implied risk-free rates derived from TIPS yields plus inflation expectations
-	- Arbitrage opportunities between TIPS-derived rates and nominal Treasury rates
-	- Missing value indicators to ensure data quality
+	It computes for each tenor (2, 5, 10, and 20 years):
+		- The TIPS-implied risk-free rate:
+			tips_treas_{t}_rf = 1e4 * (exp(real_cc{t} + log(1 + inf_swap_{t}y)) - 1)
+		where:
+			* real_cc{t} is the continuously compounded TIPS real yield (in decimal form),
+			* inf_swap_{t}y is the inflation swap rate as a decimal.
+		- Arbitrage opportunities (arb_{t}) as the difference between the TIPS-implied risk-free rate
+		and the nominal zero-coupon Treasury yield (nom_zc{t}). A positive arb_{t} suggests that the
+		TIPS-derived rate exceeds the nominal rate, indicating a potential arbitrage opportunity.
 
-	Output is saved as a parquet file with all relevant series for analysis.
+	The final merged DataFrame, saved as a parquet file, includes:
+		- date: Observation date.
+		- Columns starting with "real_": TIPS real yields for each tenor (e.g., real_cc2, real_cc5, real_cc10, real_cc20)
+		expressed in decimal form (e.g., 0.02 for 2%).
+		- Columns starting with "nom_": Computed nominal zero-coupon Treasury yields for each tenor
+		(e.g., nom_zc2, nom_zc5, nom_zc10, nom_zc20) expressed in basis points.
+		- Columns starting with "tips_": TIPS-implied risk-free rates (e.g., tips_treas_2_rf, tips_treas_5_rf,
+		tips_treas_10_rf, tips_treas_20_rf) expressed in basis points.
+		- Columns starting with "arb_": Arbitrage measures (e.g., arb_2, arb_5, arb_10, arb_20) representing the
+		difference between the TIPS-implied risk-free rate and the corresponding nominal yield (tips_treas_{t}_rf - nom_zc{t}).
+
+	Data quality is maintained by generating missing value indicators and filtering out observations with too many missing values.
+	The resulting dataset is saved as a parquet file with Snappy compression, making it ready for further analysis.
 	"""
 	real = import_tips_yields()
 	nom = import_treasury_yields()
@@ -127,17 +142,16 @@ def compute_tips_treasury():
 
 	merged = pd.merge(real, nom, on="date", how="inner")
 	merged = pd.merge(merged, swaps, on="date", how="inner")
-
-	# Compute implied riskless rate from TIPS
+	# Compute implied riskless rates from TIPS and arbitrage measures for each tenor
 	missing_indicators = []
 	for t in [2, 5, 10, 20]:
 		merged[f"tips_treas_{t}_rf"] = 1e4 * (np.exp(merged[f"real_cc{t}"] +
-													 np.log(1 + merged[f"inf_swap_{t}y"])) - 1)
-
+														np.log(1 + merged[f"inf_swap_{t}y"])) - 1)
 		merged[f"mi_{t}"] = merged[f"tips_treas_{t}_rf"].isna().astype(int)
 		missing_indicators.append(f"mi_{t}")
-
-		merged[f"arb{t}"] = merged[f"tips_treas_{t}_rf"] - merged[f"nom_zc{t}"]
+		
+		# Create new arbitrage columns with prefix "arb_"
+		merged[f"arb_{t}"] = merged[f"tips_treas_{t}_rf"] - merged[f"nom_zc{t}"]
 
 	merged["miss_count"] = merged[missing_indicators].sum(axis=1)
 	merged = merged[merged["miss_count"] < 4]
@@ -147,8 +161,8 @@ def compute_tips_treasury():
 	cols_to_keep = (["date"] +
 					[col for col in merged.columns if col.startswith("real_")] +
 					[col for col in merged.columns if col.startswith("nom_")] +
-					[col for col in merged.columns if col.startswith("tips_")])
-
+					[col for col in merged.columns if col.startswith("tips_")] +
+					[col for col in merged.columns if col.startswith("arb_")])
 	merged = merged[cols_to_keep]
 
 	output_path = os.path.join(DATA_DIR, "tips_treasury_implied_rf.parquet")

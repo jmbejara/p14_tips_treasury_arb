@@ -20,7 +20,7 @@ jaydebeapi
 jupyter
 jupyter-book
 jupyterlab
-linearmodels==6.1
+#linearmodels==6.1
 linkify-it-py
 matplotlib==3.9.2
 myst-nb

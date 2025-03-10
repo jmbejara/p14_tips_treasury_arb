@@ -9,13 +9,15 @@ import load_bases_data
 from decouple import config
 
 # Get the DATA_DIR from the environment. Ensure this env variable is set.
-DATA_DIR = config("DATA_DIR", '')
+DATA_DIR = config("DATA_DIR")
+OUTPUT_DIR = config("OUTPUT_DIR")
+
 if DATA_DIR is None:
     raise EnvironmentError("DATA_DIR environment variable is not set.")
 
 def load_predicted_data():
     # Load treasury inflation swaps from CSV.
-    swaps_path = os.path.join(DATA_DIR, "treasury_inflation_swaps.csv")
+    swaps_path = os.path.join(OUTPUT_DIR, "treasury_inflation_swaps.csv")
     df_swaps = pd.read_csv(swaps_path)
     
     # Rename and select the required columns.
