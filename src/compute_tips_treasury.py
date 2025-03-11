@@ -142,6 +142,7 @@ def compute_tips_treasury():
 
 	merged = pd.merge(real, nom, on="date", how="inner")
 	merged = pd.merge(merged, swaps, on="date", how="inner")
+
 	# Compute implied riskless rates from TIPS and arbitrage measures for each tenor
 	missing_indicators = []
 	for t in [2, 5, 10, 20]:
@@ -158,6 +159,8 @@ def compute_tips_treasury():
 
 	merged = merged.drop(missing_indicators + ["miss_count"], axis=1)
 
+	
+
 	cols_to_keep = (["date"] +
 					[col for col in merged.columns if col.startswith("real_")] +
 					[col for col in merged.columns if col.startswith("nom_")] +
@@ -169,6 +172,7 @@ def compute_tips_treasury():
 	merged.to_parquet(output_path, compression="snappy")
 
 	print(f"Data saved to {output_path}")
+	return merged 
 
 
 if __name__ == "__main__":
