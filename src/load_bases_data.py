@@ -32,6 +32,7 @@ from settings import config
 
 # config.switch_to_alt() # Use data stored on local VDI
 DATA_DIR = config("DATA_DIR")
+OUTPUT_DIR = config("OUTPUT_DIR")
 
 
 ############################################################
@@ -572,9 +573,9 @@ def demo():
 
 if __name__ == "__main__":
 
-    # df = load_combined_spreads_wide(data_dir=DATA_DIR)
-    # path = config.DATA_DIR / "pulled"
+    df = load_combined_spreads_wide(data_dir=OUTPUT_DIR)
+    path = config.OUTPUT_DIR / "pulled"
     # path.mkdir(parents=True, exist_ok=True)
-    # df.to_parquet(path / "basis_data_combined.parquet")
+    df.to_parquet(path / "arbitrage_spread_wide.parquet")
     # df.dropna().to_parquet(path / "basis_data_combined_balanced.parquet")
-    pass
+    #pass
