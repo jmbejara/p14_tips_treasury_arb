@@ -188,6 +188,25 @@ def task_compute_tips_treasury():
         "clean": [],
     }
 
+def task_generate_figures():
+    """ """
+    file_dep = [
+        "./src/generate_figures.py",
+    ]
+    targets = [
+        OUTPUT_DIR / "tips_treasury_spreads.png",
+        OUTPUT_DIR / "tips_treasury_summary_stats.csv",
+    ]
+
+    return {
+        "actions": [
+            "ipython ./src/generate_figures.py",
+        ],
+        "targets": targets,
+        "file_dep": file_dep,
+        "clean": [],
+    }
+
 ##############################$
 ## Demo: Other misc. data pulls
 ##############################$
