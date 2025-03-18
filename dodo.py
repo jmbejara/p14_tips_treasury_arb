@@ -156,6 +156,10 @@ def task_pull_bloomberg_treasury_inflation_swaps():
     """Run pull_bloomberg_treasury_inflation_swaps only if treasury_inflation_swaps.csv is not present in OUTPUT_DIR."""
     from pathlib import Path  # ensure Path is available
     output_dir = Path(OUTPUT_DIR)
+
+    if not output_dir.exists():
+        output_dir.mkdir(parents=True, exist_ok=True)
+        
     if not any(output_dir.iterdir()):
         # Only yield the nested task if the CSV file is not present.
         yield {
