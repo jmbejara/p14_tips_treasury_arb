@@ -26,8 +26,8 @@ and [mac](https://tug.org/mactex/mactex-download.html) installers).
 Having done these things, open a terminal and navigate to the root directory of the project and create a 
 conda environment using the following command:
 ```
-conda create -n blank python=3.12
-conda activate blank
+conda create -n tips python=3.12
+conda activate tips
 ```
 and then install the dependencies with pip
 ```
@@ -157,7 +157,7 @@ pip list --format=freeze
 
 #### Working with `conda` environments
 
-The dependencies used in this environment (along with many other environments commonly used in data science) are stored in the conda environment called `blank` which is saved in the file called `environment.yml`. To create the environment from the file (as a prerequisite to loading the environment), use the following command:
+The dependencies used in this environment (along with many other environments commonly used in data science) are stored in the conda environment called `tips` which is saved in the file called `environment.yml`. To create the environment from the file (as a prerequisite to loading the environment), use the following command:
 
 ```
 conda env create -f environment.yml
@@ -166,7 +166,7 @@ conda env create -f environment.yml
 Now, to load the environment, use
 
 ```
-conda activate blank
+conda activate tips
 ```
 
 Note that an environment file can be created with the following command:
@@ -186,10 +186,10 @@ pip freeze > requirements.txt
 **Other helpful `conda` commands**
 
 - Create conda environment from file: `conda env create -f environment.yml`
-- Activate environment for this project: `conda activate blank`
-- Remove conda environment: `conda remove --name blank --all`
-- Create blank conda environment: `conda create --name myenv --no-default-packages`
-- Create blank conda environment with different version of Python: `conda create --name myenv --no-default-packages python` Note that the addition of "python" will install the most up-to-date version of Python. Without this, it may use the system version of Python, which will likely have some packages installed already.
+- Activate environment for this project: `conda activate tips`
+- Remove conda environment: `conda remove --name tips --all`
+- Create tips conda environment: `conda create --name myenv --no-default-packages`
+- Create tips conda environment with different version of Python: `conda create --name myenv --no-default-packages python` Note that the addition of "python" will install the most up-to-date version of Python. Without this, it may use the system version of Python, which will likely have some packages installed already.
 
 #### `mamba` and `conda` performance issues
 
