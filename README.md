@@ -1,9 +1,18 @@
-Example Project Using the ChartBook Template
+Replicating TIPS-Treasury Arbitrage from Segmenting Arbitrage
 =============================================
 
 ## About this project
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+In this report, we replicate the TIPS–Treasury arbitrage strategy over the period 2010–2020, 
+  following the methodology of Fleckenstein et al. (2014). Our objective is to determine whether the mispricing 
+  puzzle they documented – wherein nominal Treasury bonds appear overpriced relative to inflation-protected Treasuries (TIPS) 
+  after accounting for inflation swap rates – persisted into the 2010s. We construct a synthetic nominal Treasury 
+  yield from TIPS and inflation swap contracts and compare it to the actual nominal Treasury yield of the same maturity. 
+  Our findings indicate that a positive arbitrage spread (Treasury yield lower than its synthetic counterpart) persisted 
+  throughout 2010–2020, though the magnitude of this mispricing is smaller than that reported in the mid-2000s. The arbitrage
+   opportunity gradually narrowed over the decade, consistent with increasing market efficiency or capital flowing into the trade, 
+   yet it did not fully disappear. These results reinforce the notion that significant pricing discrepancies can endure in large, 
+   liquid markets, highlighting the role of market frictions and slow-moving arbitrage capital in sustaining such inefficiencies.
 
 ## Quick Start
 
