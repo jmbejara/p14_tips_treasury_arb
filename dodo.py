@@ -214,7 +214,9 @@ def task_generate_figures():
 
 notebook_tasks = {
     "arb_replication.ipynb": {
-        "file_dep": [],
+        "file_dep": [
+            "./src/generate_figures.py"
+        ],
         "targets": [],
     }
 }
