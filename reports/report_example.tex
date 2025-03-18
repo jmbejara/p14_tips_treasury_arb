@@ -65,17 +65,17 @@ magna sit. Sem et tortor consequat id.
 Here is a textbox...
 \end{textbox}
 
-I give an example of a simple table in Table \ref{table:pandas_to_latex_simple_table1.tex}.
+I give an example of a simple table in Table \ref{table:tips_treasury_summary_table.tex}.
 
 
 \begin{table}
 \caption{A Simple Table From Pandas, No. 1}
 \centering
-\input{\PathToOutput/pandas_to_latex_simple_table1.tex}
+\input{\PathToOutput/tips_treasury_summary_table.tex}
 \caption*{
   Here I show some data...
 }
-\label{table:pandas_to_latex_simple_table1.tex}
+\label{table:tips_treasury_summary_table.tex}
 \end{table}
 
 
@@ -85,8 +85,7 @@ The Black–Scholes equation governing the price evolution of derivatives under
 the Black–Scholes model is given in (\ref{eq:black-scholes}). Some aligned
 equations are given in (\ref{eq:align1}) and (\ref{eq:align2}). I give an
 example in which the two share a single equation number in
-(\ref{eq:align-share}). Be sure to take a look at the results in 
-Table \ref{table:example_table.tex} and the diagram in 
+(\ref{eq:align-share}). Be sure to take a look at the diagram in 
 Figure \ref{fig:star_network_n_nodes.eps}.
 Arcu felis bibendum ut tristique et. Eget gravida
 cum sociis natoque penatibus et magnis. Elit pellentesque habitant morbi
@@ -123,50 +122,6 @@ P(S_t, t) &= Ke^{-r(T - t)} - S_t + C(S_t, t)   \label{eq:align1}\\
 
 
 
-\begin{table}
-\caption{Summary Stats}
-\centering
-\input{\PathToOutput/example_table.tex}
-\caption*{
-  Here I show some data...
-}
-\label{table:example_table.tex}
-\end{table}
-
-\begin{align}
-\begin{split}
-P(S_t, t) &= Ke^{-r(T - t)} - S_t + C(S_t, t)   \\
-          &= N(-d_-) Ke^{-r(T - t)} - N(-d_+) S_t 
-\end{split}
-\label{eq:align-share}
-\end{align}
-
-
-
-Vitae congue mauris rhoncus aenean. Turpis egestas pretium aenean pharetra.
-Non pulvinar neque laoreet suspendisse interdum consectetur libero id
-faucibus. Id porta nibh venenatis cras sed. Viverra tellus in hac habitasse
-platea. Sit amet facilisis magna etiam tempor orci eu lobortis elementum.
-Porttitor leo a diam sollicitudin. Imperdiet proin fermentum leo vel orci
-porta non. Maecenas pharetra convallis posuere morbi. Vel risus commodo
-viverra maecenas accumsan lacus vel facilisis volutpat. Faucibus vitae
-aliquet nec ullamcorper sit amet risus nullam. Sit amet venenatis urna cursus
-eget nunc scelerisque viverra mauris. A arcu cursus vitae congue. Ullamcorper
-morbi tincidunt ornare massa eget.
-
-\begin{figure}
-\centering
-\captionsetup{width=0.8\textwidth}
-\caption{Network}
-  \centering
-  \includegraphics[width=0.6\linewidth]{\PathToAssets/star_network_n_nodes.eps}
-\caption*{
-  Star network
-  }
-\label{fig:star_network_n_nodes.eps}
-\end{figure}
-
-
 Eget duis at tellus at. Turpis egestas integer eget aliquet nibh praesent
 tristique magna. Egestas diam in arcu cursus euismod quis viverra nibh cras.
 Velit laoreet id donec ultrices tincidunt arcu non sodales. Urna duis
@@ -186,7 +141,7 @@ way to cite \citep{sharpe1964capital}.
 \centering
 \caption{Example plot}
   \centering
-  \includegraphics[width=0.75\linewidth]{\PathToOutput/example_plot.png}
+  \includegraphics[width=0.75\linewidth]{\PathToOutput/tips_treasury_spreads.png}
   % \caption{Average returns}
 \caption*{
   Inflation and Real GDP...

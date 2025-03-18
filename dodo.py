@@ -192,15 +192,19 @@ def task_generate_figures():
     """ """
     file_dep = [
         "./src/generate_figures.py",
+        "./src/generate_latex_table.py",
     ]
-    targets = [
-        OUTPUT_DIR / "tips_treasury_spreads.png",
-        OUTPUT_DIR / "tips_treasury_summary_stats.csv",
+    file_output = [
+        "tips_treasury_spreads.png",
+        "tips_treasury_summary_stats.csv",
+        'tips_treasury_summary_table.tex'
     ]
+    targets = [OUTPUT_DIR / file for file in file_output]
 
     return {
         "actions": [
             "ipython ./src/generate_figures.py",
+            "ipython ./src/generate_latex_table.py",
         ],
         "targets": targets,
         "file_dep": file_dep,
@@ -239,45 +243,45 @@ def task_generate_figures():
 #     }
 
 
-def task_summary_stats():
-    """ """
-    file_dep = [
-        "./src/pull_fred.py",
-        "./src/example_table.py"]
-    file_output = [
-        "example_table.tex",
-        "pandas_to_latex_simple_table1.tex",
-    ]
-    targets = [OUTPUT_DIR / file for file in file_output]
+# def task_summary_stats():
+#     """ """
+#     file_dep = [
+#         "./src/pull_fred.py",
+#         "./src/example_table.py"]
+#     file_output = [
+#         "example_table.tex",
+#         "pandas_to_latex_simple_table1.tex",
+#     ]
+#     targets = [OUTPUT_DIR / file for file in file_output]
 
-    return {
-        "actions": [
-            "ipython ./src/pull_fred.py",  # Ensure FRED data is pulled
-            "ipython ./src/example_table.py",
-            "ipython ./src/pandas_to_latex_demo.py",
-        ],
-        "targets": targets,
-        "file_dep": file_dep,
-        "clean": True,
-    }
+#     return {
+#         "actions": [
+#             "ipython ./src/pull_fred.py",  # Ensure FRED data is pulled
+#             "ipython ./src/example_table.py",
+#             "ipython ./src/pandas_to_latex_demo.py",
+#         ],
+#         "targets": targets,
+#         "file_dep": file_dep,
+#         "clean": True,
+#     }
 
 
-def task_example_plot():
-    """Example plots"""
-    file_dep = [Path("./src") / file for file in ["example_plot.py", "pull_fred.py"]]
-    file_output = ["example_plot.png"]
-    targets = [OUTPUT_DIR / file for file in file_output]
+# def task_example_plot():
+#     """Example plots"""
+#     file_dep = [Path("./src") / file for file in src_files]
+#     file_output = ["example_plot.png"]
+#     targets = [OUTPUT_DIR / file for file in file_output]
 
-    return {
-        "actions": [
-            # "date 1>&2",
-            # "time ipython ./src/example_plot.py",
-            "ipython ./src/example_plot.py",
-        ],
-        "targets": targets,
-        "file_dep": file_dep,
-        "clean": True,
-    }
+#     return {
+#         "actions": [
+#             # "date 1>&2",
+#             # "time ipython ./src/example_plot.py",
+#             "ipython ./src/example_plot.py",
+#         ],
+#         "targets": targets,
+#         "file_dep": file_dep,
+#         "clean": True,
+#     }
 #
 #
 # def task_chart_repo_rates():
@@ -329,62 +333,67 @@ def task_example_plot():
 #         ],
 #     },
 # }
-#
-#
-# def task_convert_notebooks_to_scripts():
-#     """Convert notebooks to script form to detect changes to source code rather
-#     than to the notebook's metadata.
-#     """
-#     build_dir = Path(OUTPUT_DIR)
-#
-#     for notebook in notebook_tasks.keys():
-#         notebook_name = notebook.split(".")[0]
-#         yield {
-#             "name": notebook,
-#             "actions": [
-#                 jupyter_clear_output(notebook_name),
-#                 jupyter_to_python(notebook_name, build_dir),
-#             ],
-#             "file_dep": [Path("./src") / notebook],
-#             "targets": [OUTPUT_DIR / f"_{notebook_name}.py"],
-#             "clean": True,
-#             "verbosity": 0,
-#         }
+notebook_tasks = {
+    "arb_replication.ipynb": {
+        "file_dep": [],
+        "targets": [],
+    }
+}
+
+def task_convert_notebooks_to_scripts():
+    """Convert notebooks to script form to detect changes to source code rather
+    than to the notebook's metadata.
+    """
+    build_dir = Path(OUTPUT_DIR)
+
+    for notebook in notebook_tasks.keys():
+        notebook_name = notebook.split(".")[0]
+        yield {
+            "name": notebook,
+            "actions": [
+                jupyter_clear_output(notebook_name),
+                jupyter_to_python(notebook_name, build_dir),
+            ],
+            "file_dep": [Path("./src") / notebook],
+            "targets": [OUTPUT_DIR / f"_{notebook_name}.py"],
+            "clean": True,
+            "verbosity": 0,
+        }
 
 
 # fmt: off
-# def task_run_notebooks():
-#     """Preps the notebooks for presentation format.
-#     Execute notebooks if the script version of it has been changed.
-#     """
-#     for notebook in notebook_tasks.keys():
-#         notebook_name = notebook.split(".")[0]
-#         yield {
-#             "name": notebook,
-#             "actions": [
-#                 """python -c "import sys; from datetime import datetime; print(f'Start """ + notebook + """: {datetime.now()}', file=sys.stderr)" """,
-#                 jupyter_execute_notebook(notebook_name),
-#                 jupyter_to_html(notebook_name),
-#                 copy_file(
-#                     Path("./src") / f"{notebook_name}.ipynb",
-#                     OUTPUT_DIR / f"{notebook_name}.ipynb",
-#                     mkdir=True,
-#                 ),
-#                 jupyter_clear_output(notebook_name),
-#                 # jupyter_to_python(notebook_name, build_dir),
-#                 """python -c "import sys; from datetime import datetime; print(f'End """ + notebook + """: {datetime.now()}', file=sys.stderr)" """,
-#             ],
-#             "file_dep": [
-#                 OUTPUT_DIR / f"_{notebook_name}.py",
-#                 *notebook_tasks[notebook]["file_dep"],
-#             ],
-#             "targets": [
-#                 OUTPUT_DIR / f"{notebook_name}.html",
-#                 OUTPUT_DIR / f"{notebook_name}.ipynb",
-#                 *notebook_tasks[notebook]["targets"],
-#             ],
-#             "clean": True,
-#         }
+def task_run_notebooks():
+    """Preps the notebooks for presentation format.
+    Execute notebooks if the script version of it has been changed.
+    """
+    for notebook in notebook_tasks.keys():
+        notebook_name = notebook.split(".")[0]
+        yield {
+            "name": notebook,
+            "actions": [
+                """python -c "import sys; from datetime import datetime; print(f'Start """ + notebook + """: {datetime.now()}', file=sys.stderr)" """,
+                jupyter_execute_notebook(notebook_name),
+                jupyter_to_html(notebook_name),
+                copy_file(
+                    Path("./src") / f"{notebook_name}.ipynb",
+                    OUTPUT_DIR / f"{notebook_name}.ipynb",
+                    mkdir=True,
+                ),
+                jupyter_clear_output(notebook_name),
+                # jupyter_to_python(notebook_name, build_dir),
+                """python -c "import sys; from datetime import datetime; print(f'End """ + notebook + """: {datetime.now()}', file=sys.stderr)" """,
+            ],
+            "file_dep": [
+                OUTPUT_DIR / f"_{notebook_name}.py",
+                *notebook_tasks[notebook]["file_dep"],
+            ],
+            "targets": [
+                OUTPUT_DIR / f"{notebook_name}.html",
+                OUTPUT_DIR / f"{notebook_name}.ipynb",
+                *notebook_tasks[notebook]["targets"],
+            ],
+            "clean": True,
+        }
 # fmt: on
 
 
@@ -397,20 +406,20 @@ def task_compile_latex_docs():
     """Compile the LaTeX documents to PDFs"""
     file_dep = [
         "./reports/report_example.tex",
-        "./reports/my_article_header.sty",
-        "./reports/slides_example.tex",
-        "./reports/my_beamer_header.sty",
-        "./reports/my_common_header.sty",
-        "./reports/report_simple_example.tex",
-        "./reports/slides_simple_example.tex",
-        "./src/example_plot.py",
-        "./src/example_table.py",
+        "./reports/my_article_header.sty",      # style 
+        #"./reports/slides_example.tex",
+        #`"./reports/my_beamer_header.sty",       # style
+        "./reports/my_common_header.sty",       # style
+        # "./reports/report_simple_example.tex",
+        # "./reports/slides_simple_example.tex",
+        "./src/generate_figures.py",
+        "./src/generate_latex_table.py",
     ]
     targets = [
         "./reports/report_example.pdf",
-        "./reports/slides_example.pdf",
-        "./reports/report_simple_example.pdf",
-        "./reports/slides_simple_example.pdf",
+        #"./reports/slides_example.pdf",
+        # "./reports/report_simple_example.pdf",
+        # "./reports/slides_simple_example.pdf",
     ]
 
     return {
@@ -418,13 +427,13 @@ def task_compile_latex_docs():
             # My custom LaTeX templates
             "latexmk -xelatex -halt-on-error -cd ./reports/report_example.tex",  # Compile
             "latexmk -xelatex -halt-on-error -c -cd ./reports/report_example.tex",  # Clean
-            "latexmk -xelatex -halt-on-error -cd ./reports/slides_example.tex",  # Compile
-            "latexmk -xelatex -halt-on-error -c -cd ./reports/slides_example.tex",  # Clean
+            # "latexmk -xelatex -halt-on-error -cd ./reports/slides_example.tex",  # Compile
+            # "latexmk -xelatex -halt-on-error -c -cd ./reports/slides_example.tex",  # Clean
             # Simple templates based on small adjustments to Overleaf templates
-            "latexmk -xelatex -halt-on-error -cd ./reports/report_simple_example.tex",  # Compile
-            "latexmk -xelatex -halt-on-error -c -cd ./reports/report_simple_example.tex",  # Clean
-            "latexmk -xelatex -halt-on-error -cd ./reports/slides_simple_example.tex",  # Compile
-            "latexmk -xelatex -halt-on-error -c -cd ./reports/slides_simple_example.tex",  # Clean
+            # "latexmk -xelatex -halt-on-error -cd ./reports/report_simple_example.tex",  # Compile
+            # "latexmk -xelatex -halt-on-error -c -cd ./reports/report_simple_example.tex",  # Clean
+            # "latexmk -xelatex -halt-on-error -cd ./reports/slides_simple_example.tex",  # Compile
+            # "latexmk -xelatex -halt-on-error -c -cd ./reports/slides_simple_example.tex",  # Clean
             #
             # Example of compiling and cleaning in another directory. This often fails, so I don't use it
             # f"latexmk -xelatex -halt-on-error -cd -output-directory=../_output/ ./reports/report_example.tex",  # Compile
