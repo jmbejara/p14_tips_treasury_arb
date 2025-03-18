@@ -405,7 +405,7 @@ def task_run_notebooks():
 def task_compile_latex_docs():
     """Compile the LaTeX documents to PDFs"""
     file_dep = [
-        "./reports/report_example.tex",
+        "./reports/report.tex",
         "./reports/my_article_header.sty",      # style 
         #"./reports/slides_example.tex",
         #`"./reports/my_beamer_header.sty",       # style
@@ -416,7 +416,7 @@ def task_compile_latex_docs():
         "./src/generate_latex_table.py",
     ]
     targets = [
-        "./reports/report_example.pdf",
+        "./reports/report.pdf",
         #"./reports/slides_example.pdf",
         # "./reports/report_simple_example.pdf",
         # "./reports/slides_simple_example.pdf",
@@ -425,8 +425,8 @@ def task_compile_latex_docs():
     return {
         "actions": [
             # My custom LaTeX templates
-            "latexmk -xelatex -halt-on-error -cd ./reports/report_example.tex",  # Compile
-            "latexmk -xelatex -halt-on-error -c -cd ./reports/report_example.tex",  # Clean
+            "latexmk -xelatex -halt-on-error -cd ./reports/report.tex",  # Compile
+            "latexmk -xelatex -halt-on-error -c -cd ./reports/report.tex",  # Clean
             # "latexmk -xelatex -halt-on-error -cd ./reports/slides_example.tex",  # Compile
             # "latexmk -xelatex -halt-on-error -c -cd ./reports/slides_example.tex",  # Clean
             # Simple templates based on small adjustments to Overleaf templates
@@ -436,8 +436,8 @@ def task_compile_latex_docs():
             # "latexmk -xelatex -halt-on-error -c -cd ./reports/slides_simple_example.tex",  # Clean
             #
             # Example of compiling and cleaning in another directory. This often fails, so I don't use it
-            # f"latexmk -xelatex -halt-on-error -cd -output-directory=../_output/ ./reports/report_example.tex",  # Compile
-            # f"latexmk -xelatex -halt-on-error -c -cd -output-directory=../_output/ ./reports/report_example.tex",  # Clean
+            # f"latexmk -xelatex -halt-on-error -cd -output-directory=../_output/ ./reports/report.tex",  # Compile
+            # f"latexmk -xelatex -halt-on-error -c -cd -output-directory=../_output/ ./reports/report.tex",  # Clean
         ],
         "targets": targets,
         "file_dep": file_dep,
