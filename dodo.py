@@ -180,7 +180,7 @@ def task_compute_tips_treasury():
         "./src/compute_tips_treasury.py",
     ]
     targets = [
-        OUTPUT_DIR / "tips_treasury_implied_rf.parquet",
+        DATA_DIR / "tips_treasury_implied_rf.parquet",
     ]
 
     return {
@@ -200,7 +200,7 @@ def task_generate_figures():
     ]
     file_output = [
         "tips_treasury_spreads.png",
-        "tips_treasury_summary_stats.csv",
+        "tips_treasury_summary.csv",
         'tips_treasury_summary_table.tex'
     ]
     targets = [OUTPUT_DIR / file for file in file_output]
