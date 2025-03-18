@@ -131,6 +131,9 @@ The `settings.py` file is the entry point for all other scripts to these
 definitions. That is, all code that references these variables and others are
 loading by importing `config`.
 
+#### Note on Data Dependencies
+If your machine does not have Bloomberg access, it cannot run `xbbg` properly. When running `doit`, this will cause the task `pull_bloomberg_treasury_inflation_swaps` to fail with a `blpapi` error. To avoid this, run `doit` which creates the data directory `_output`, then manually insert the completed file `treasury_inflation_swaps.csv`.
+
 ### Naming Conventions
 
  - **`pull_` vs `load_`**: Files or functions that pull data from an external
