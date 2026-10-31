@@ -10,7 +10,7 @@
 # to match the appropriate syntax:
 ABlog==0.11.11
 black==24.8.0
-chartbook @ git+https://github.com/jmbejara/chartbook@main
+chartbook>=0.4.0
 colorama
 doit==0.36.0
 fabric==3.2.2
@@ -34,7 +34,7 @@ pandas-market-calendars==4.4.1
 pandas==2.2.3
 paramiko==3.5.0
 plotly==5.24.1
-polars==1.9.0
+polars>=1.33,<2
 pyarrow
 pydata-sphinx-theme==0.15.4
 pytest==8.3.3
